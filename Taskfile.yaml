@@ -9,3 +9,7 @@ tasks:
       - defer: cd services/product_service && rm salespot
       - docker-compose build product_service
       - docker-compose up product_service
+
+  migrate:
+    cmds:
+      - goose -dir migrations postgres ${MIGRATE_DSN} {{.CLI_ARGS}}
