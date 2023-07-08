@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"salespot/services/product_service/internal/transport/ginproduct"
 	"salespot/shared/common"
 	sctx "salespot/shared/sctx"
 	"salespot/shared/sctx/component/discovery/consul"
@@ -56,6 +57,12 @@ var rootCmd = &cobra.Command{
 		router.GET("/ping", func(c *gin.Context) {
 			c.JSON(http.StatusOK, core.ResponseData("ok"))
 		})
+
+		apiRouter := router.Group("/api")
+		productRouter := apiRouter.Group("/products")
+		{
+			productRouter.GET("/", ginproduct.ListProduct(serviceCtx))
+		}
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
 			logger.Fatal(err)
