@@ -2,11 +2,11 @@ package storage
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/bson"
 	"salespot/services/product_service/internal/models"
 	"salespot/shared/sctx/component/tracing"
 )
@@ -29,7 +29,7 @@ func (r *redisStore) GetProduct(ctx context.Context, id string) (*models.Product
 	}
 
 	var product models.Product
-	if err = json.Unmarshal([]byte(result), &product); err != nil {
+	if err = bson.Unmarshal([]byte(result), &product); err != nil {
 		return nil, err
 	}
 
@@ -40,11 +40,12 @@ func (r *redisStore) StoreProduct(ctx context.Context, product *models.Product) 
 	ctx, span := tracing.StartTrace(ctx, "cache-storage.store-product")
 	defer span.End()
 
-	bytes, err := json.Marshal(product)
+	bytes, err := bson.Marshal(product)
 	if err != nil {
 		return err
 	}
-	if err = r.client.Set(ctx, fmt.Sprintf("/products/%s", product.ID), bytes, time.Hour).Err(); err != nil {
+
+	if err = r.client.Set(ctx, fmt.Sprintf("/products/%s", product.ID.Hex()), bytes, time.Hour).Err(); err != nil {
 		return err
 	}
 
