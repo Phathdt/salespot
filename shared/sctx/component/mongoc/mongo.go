@@ -5,9 +5,9 @@ import (
 	"flag"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"salespot/shared/sctx"
 )
 
@@ -42,13 +42,11 @@ func (m *mongoDB) Activate(sc sctx.ServiceContext) error {
 
 	ctx := context.Background()
 
-	cmdMonitor := &event.CommandMonitor{
-		Started: func(_ context.Context, e *event.CommandStartedEvent) {
-			m.logger.Info(e.Command)
-		},
-	}
+	opts := options.Client()
+	opts.Monitor = otelmongo.NewMonitor()
+	opts.ApplyURI(m.mongoURI)
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(m.mongoURI).SetMonitor(cmdMonitor))
+	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
 		fmt.Println(err)
 		return err

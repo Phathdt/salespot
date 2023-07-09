@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"salespot/services/product_service/internal/models"
+	"salespot/shared/sctx/component/tracing"
 )
 
 type listProductRepo interface {
@@ -19,5 +20,8 @@ func NewListProductHdl(repo listProductRepo) *listProductHdl {
 }
 
 func (h *listProductHdl) Response(ctx context.Context) ([]models.Product, error) {
+	ctx, span := tracing.StartTrace(ctx, "handler.list-product")
+	defer span.End()
+
 	return h.repo.ListProduct(ctx)
 }

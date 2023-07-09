@@ -13,6 +13,7 @@ import (
 	"salespot/shared/sctx/component/ginc"
 	smdlw "salespot/shared/sctx/component/ginc/middleware"
 	"salespot/shared/sctx/component/mongoc"
+	"salespot/shared/sctx/component/tracing"
 	"salespot/shared/sctx/core"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,7 @@ func newServiceCtx() sctx.ServiceContext {
 		sctx.WithComponent(ginc.NewGin(common.KeyCompGIN)),
 		sctx.WithComponent(mongoc.NewMongoDB(common.KeyCompMongo, "")),
 		sctx.WithComponent(consul.NewConsulComponent(common.KeyCompConsul, serviceName, version, 3000)),
+		sctx.WithComponent(tracing.NewTracingClient(common.KeyCompJaeger, serviceName, version)),
 	)
 }
 
@@ -55,6 +57,9 @@ var rootCmd = &cobra.Command{
 		router.Use(gin.Recovery(), smdlw.Recovery(serviceCtx), otelgin.Middleware(serviceName), smdlw.Traceable(), smdlw.Logger())
 
 		router.GET("/ping", func(c *gin.Context) {
+			_, span := tracing.StartTrace(c.Request.Context(), "ping")
+			defer span.End()
+
 			c.JSON(http.StatusOK, core.ResponseData("ok"))
 		})
 

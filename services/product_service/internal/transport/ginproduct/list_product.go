@@ -9,6 +9,7 @@ import (
 	"salespot/shared/common"
 	"salespot/shared/sctx"
 	"salespot/shared/sctx/component/mongoc"
+	"salespot/shared/sctx/component/tracing"
 	"salespot/shared/sctx/core"
 
 	"github.com/gin-gonic/gin"
@@ -16,13 +17,16 @@ import (
 
 func ListProduct(sc sctx.ServiceContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx, span := tracing.StartTrace(c, "transport.list-product")
+		defer span.End()
+
 		mongoDb := sc.MustGet(common.KeyCompMongo).(mongoc.MongoComponent).GetDb()
 
 		store := storage.NewMongoStore(mongoDb)
 		repository := repo.NewRepository(store)
 		hdl := handlers.NewListProductHdl(repository)
 
-		products, err := hdl.Response(c)
+		products, err := hdl.Response(ctx)
 		if err != nil {
 			panic(err)
 		}

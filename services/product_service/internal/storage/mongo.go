@@ -3,10 +3,12 @@ package storage
 import (
 	"context"
 
+	"salespot/services/product_service/internal/models"
+	"salespot/shared/sctx/component/tracing"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"salespot/services/product_service/internal/models"
 )
 
 type mongoStore struct {
@@ -18,6 +20,10 @@ func NewMongoStore(db *mongo.Database) *mongoStore {
 }
 
 func (m *mongoStore) ListProduct(ctx context.Context) ([]models.Product, error) {
+	ctx, span := tracing.StartTrace(ctx, "storage.list-product")
+
+	defer span.End()
+
 	collection := m.db.Collection(models.Product{}.Collection())
 
 	cur, err := collection.Find(ctx, bson.M{})
@@ -41,6 +47,9 @@ func (m *mongoStore) ListProduct(ctx context.Context) ([]models.Product, error) 
 }
 
 func (m *mongoStore) GetProduct(ctx context.Context, id string) (*models.Product, error) {
+	ctx, span := tracing.StartTrace(ctx, "storage.get-product")
+	defer span.End()
+
 	collection := m.db.Collection(models.Product{}.Collection())
 
 	objectId, err := primitive.ObjectIDFromHex(id)
