@@ -3,19 +3,19 @@ package storage
 import (
 	"context"
 
+	"github.com/qiniu/qmgo"
 	"salespot/services/product_service/internal/models"
 	"salespot/shared/sctx/component/tracing"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type mongoStore struct {
-	db *mongo.Database
+	db *qmgo.Database
 }
 
-func NewMongoStore(db *mongo.Database) *mongoStore {
+func NewMongoStore(db *qmgo.Database) *mongoStore {
 	return &mongoStore{db: db}
 }
 
@@ -25,21 +25,9 @@ func (m *mongoStore) ListProduct(ctx context.Context) ([]models.Product, error) 
 
 	collection := m.db.Collection(models.Product{}.Collection())
 
-	cur, err := collection.Find(ctx, bson.M{})
-	if err != nil {
+	var products []models.Product
+	if err := collection.Find(ctx, bson.M{}).All(&products); err != nil {
 		return nil, err
-	}
-	defer cur.Close(ctx)
-
-	products := make([]models.Product, 0)
-
-	for cur.Next(ctx) {
-		var product models.Product
-		err := cur.Decode(&product)
-		if err != nil {
-			return nil, err
-		}
-		products = append(products, product)
 	}
 
 	return products, nil
@@ -57,7 +45,7 @@ func (m *mongoStore) GetProduct(ctx context.Context, id string) (*models.Product
 	}
 
 	var product models.Product
-	if err = collection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&product); err != nil {
+	if err = collection.Find(ctx, bson.M{"_id": objectId}).One(&product); err != nil {
 		return nil, err
 	}
 

@@ -5,21 +5,22 @@ import (
 	"flag"
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/qiniu/qmgo"
+	qoptions "github.com/qiniu/qmgo/options"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"salespot/shared/sctx"
 )
 
 type MongoComponent interface {
-	GetDb() *mongo.Database
+	GetDb() *qmgo.Database
 }
 type mongoDB struct {
 	id            string
 	prefix        string
 	logger        sctx.Logger
-	db            *mongo.Database
-	client        *mongo.Client
+	db            *qmgo.Database
+	client        *qmgo.Client
 	mongoURI      string
 	mongoDatabase string
 }
@@ -44,9 +45,8 @@ func (m *mongoDB) Activate(sc sctx.ServiceContext) error {
 
 	opts := options.Client()
 	opts.Monitor = otelmongo.NewMonitor()
-	opts.ApplyURI(m.mongoURI)
-
-	client, err := mongo.Connect(ctx, opts)
+	clientOptions := qoptions.ClientOptions{ClientOptions: opts}
+	client, err := qmgo.NewClient(ctx, &qmgo.Config{Uri: m.mongoURI}, clientOptions)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -60,9 +60,9 @@ func (m *mongoDB) Activate(sc sctx.ServiceContext) error {
 }
 
 func (m *mongoDB) Stop() error {
-	return m.client.Disconnect(context.Background())
+	return m.client.Close(context.Background())
 }
 
-func (m *mongoDB) GetDb() *mongo.Database {
+func (m *mongoDB) GetDb() *qmgo.Database {
 	return m.db
 }
