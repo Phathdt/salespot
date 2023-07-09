@@ -17,6 +17,7 @@ import (
 	"salespot/shared/sctx/component/tracing"
 	"salespot/shared/sctx/core"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -56,7 +57,7 @@ var rootCmd = &cobra.Command{
 
 		router := ginComp.GetRouter()
 
-		router.Use(gin.Recovery(), smdlw.Recovery(serviceCtx), otelgin.Middleware(serviceName), smdlw.Traceable(), smdlw.Logger())
+		router.Use(gin.Recovery(), cors.Default(), smdlw.Recovery(serviceCtx), otelgin.Middleware(serviceName), smdlw.Traceable(), smdlw.Logger())
 
 		router.GET("/ping", func(c *gin.Context) {
 			_, span := tracing.StartTrace(c.Request.Context(), "ping")

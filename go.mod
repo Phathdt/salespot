@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/facebookgo/flagenv v0.0.0-20160425205200-fcd59fca7456
+	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/logger v0.2.5
 	github.com/gin-gonic/gin v1.9.0
 	github.com/hashicorp/consul/api v1.20.0
