@@ -9,6 +9,7 @@ import (
 	"salespot/shared/common"
 	"salespot/shared/sctx"
 	"salespot/shared/sctx/component/mongoc"
+	"salespot/shared/sctx/component/redisc"
 	"salespot/shared/sctx/component/tracing"
 	"salespot/shared/sctx/core"
 
@@ -21,9 +22,11 @@ func ListProduct(sc sctx.ServiceContext) gin.HandlerFunc {
 		defer span.End()
 
 		mongoDb := sc.MustGet(common.KeyCompMongo).(mongoc.MongoComponent).GetDb()
+		redisClient := sc.MustGet(common.KeyCompRedis).(redisc.RedisComponent).GetClient()
 
 		store := storage.NewMongoStore(mongoDb)
-		repository := repo.NewRepository(store)
+		redisStore := storage.NewRedisStore(redisClient)
+		repository := repo.NewRepository(store, redisStore)
 		hdl := handlers.NewListProductHdl(repository)
 
 		products, err := hdl.Response(ctx)

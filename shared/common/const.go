@@ -6,5 +6,6 @@ const (
 	KeyCompConsul = "consul"
 	KeyCompMongo  = "mongo"
 	KeyMigrator   = "migrator"
+	KeyCompRedis  = "redis"
 	KeyCompJaeger = "jaeger"
 )

@@ -21,7 +21,6 @@ func NewMongoStore(db *mongo.Database) *mongoStore {
 
 func (m *mongoStore) ListProduct(ctx context.Context) ([]models.Product, error) {
 	ctx, span := tracing.StartTrace(ctx, "storage.list-product")
-
 	defer span.End()
 
 	collection := m.db.Collection(models.Product{}.Collection())

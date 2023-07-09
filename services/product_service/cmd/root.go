@@ -13,6 +13,7 @@ import (
 	"salespot/shared/sctx/component/ginc"
 	smdlw "salespot/shared/sctx/component/ginc/middleware"
 	"salespot/shared/sctx/component/mongoc"
+	"salespot/shared/sctx/component/redisc"
 	"salespot/shared/sctx/component/tracing"
 	"salespot/shared/sctx/core"
 
@@ -33,6 +34,7 @@ func newServiceCtx() sctx.ServiceContext {
 		sctx.WithComponent(mongoc.NewMongoDB(common.KeyCompMongo, "")),
 		sctx.WithComponent(consul.NewConsulComponent(common.KeyCompConsul, serviceName, version, 3000)),
 		sctx.WithComponent(tracing.NewTracingClient(common.KeyCompJaeger, serviceName, version)),
+		sctx.WithComponent(redisc.NewRedisc(common.KeyCompRedis)),
 	)
 }
 
