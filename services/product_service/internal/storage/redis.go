@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"salespot/services/product_service/internal/models"
@@ -43,7 +44,7 @@ func (r *redisStore) StoreProduct(ctx context.Context, product *models.Product) 
 	if err != nil {
 		return err
 	}
-	if err = r.client.Set(ctx, fmt.Sprintf("/products/%s", product.ID), bytes, -1).Err(); err != nil {
+	if err = r.client.Set(ctx, fmt.Sprintf("/products/%s", product.ID), bytes, time.Hour).Err(); err != nil {
 		return err
 	}
 
