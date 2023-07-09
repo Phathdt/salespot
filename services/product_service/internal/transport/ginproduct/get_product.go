@@ -17,7 +17,7 @@ import (
 
 func GetProduct(sc sctx.ServiceContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, span := tracing.StartTrace(c, "transport.get-product")
+		ctx, span := tracing.StartTrace(c.Request.Context(), "transport.get-product")
 		defer span.End()
 
 		id := c.Param("id")

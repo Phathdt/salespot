@@ -17,7 +17,7 @@ import (
 
 func ListProduct(sc sctx.ServiceContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, span := tracing.StartTrace(c, "transport.list-product")
+		ctx, span := tracing.StartTrace(c.Request.Context(), "transport.list-product")
 		defer span.End()
 
 		mongoDb := sc.MustGet(common.KeyCompMongo).(mongoc.MongoComponent).GetDb()
