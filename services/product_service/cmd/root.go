@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	"salespot/services/product_service/internal/transport/ginproduct"
 	"salespot/shared/common"
-	sctx "salespot/shared/sctx"
+	"salespot/shared/sctx"
 	"salespot/shared/sctx/component/discovery/consul"
 	"salespot/shared/sctx/component/ginc"
 	smdlw "salespot/shared/sctx/component/ginc/middleware"
