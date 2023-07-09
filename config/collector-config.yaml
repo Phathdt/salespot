@@ -7,16 +7,19 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
+  memory_limiter:
+    limit_percentage: 50
+    check_interval: 1s
+    spike_limit_percentage: 30
   batch:
     timeout: 1s
-    send_batch_size: 1024
+    send_batch_size: 8192
 
 exporters:
   logging:
     loglevel: debug
   prometheus:
-    endpoint: collector:6666
-    namespace: default
+    endpoint: collector:9464
   otlp:
     endpoint: tempo:4317
     tls:
@@ -26,11 +29,11 @@ service:
   pipelines:
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, memory_limiter]
       exporters: [prometheus, logging]
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, memory_limiter]
       exporters: [otlp, logging]
   telemetry:
     logs:

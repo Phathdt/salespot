@@ -71,6 +71,15 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/docker-config.yaml
 
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    command:
+        - --config.file=/etc/prometheus/prometheus-config.yaml
+    volumes:
+        - ./config/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml
+    ports:
+        - "9090:9090"
+
   product_service:
     build:
       dockerfile: ./services/product_service/Dockerfile.dev
@@ -82,7 +91,8 @@ services:
       MONGO_DATABASE: ${MONGO_DATABASE}
       CONSUL_HOST: consul:8500
       REDIS_URI: redis://redis-db:6379
-      COLLECTOR_HOST: collector:4317
+      TRACE_COLLECTOR_HOST: collector:4317
+      METRIC_COLLECTOR_HOST: collector:4317
     ports:
       - 13000:3000
 

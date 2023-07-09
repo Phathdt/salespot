@@ -35,7 +35,7 @@ func (t *tracingClient) ID() string {
 }
 
 func (t *tracingClient) InitFlags() {
-	flag.StringVar(&t.collectorHost, "collector_host", "localhost:5555", "collector host")
+	flag.StringVar(&t.collectorHost, "trace_collector_host", "localhost:4317", "collector host")
 }
 
 func (t *tracingClient) Activate(sc sctx.ServiceContext) error {

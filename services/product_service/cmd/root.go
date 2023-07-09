@@ -6,12 +6,14 @@ import (
 	"os"
 	"time"
 
+	"go.opentelemetry.io/otel/metric"
 	"salespot/services/product_service/internal/transport/ginproduct"
 	"salespot/shared/common"
 	sctx "salespot/shared/sctx"
 	"salespot/shared/sctx/component/discovery/consul"
 	"salespot/shared/sctx/component/ginc"
 	smdlw "salespot/shared/sctx/component/ginc/middleware"
+	"salespot/shared/sctx/component/metrics"
 	"salespot/shared/sctx/component/mongoc"
 	"salespot/shared/sctx/component/redisc"
 	"salespot/shared/sctx/component/tracing"
@@ -34,7 +36,8 @@ func newServiceCtx() sctx.ServiceContext {
 		sctx.WithComponent(ginc.NewGin(common.KeyCompGIN)),
 		sctx.WithComponent(mongoc.NewMongoDB(common.KeyCompMongo, "")),
 		sctx.WithComponent(consul.NewConsulComponent(common.KeyCompConsul, serviceName, version, 3000)),
-		sctx.WithComponent(tracing.NewTracingClient(common.KeyCompJaeger, serviceName, version)),
+		sctx.WithComponent(tracing.NewTracingClient(common.KeyCompTracing, serviceName, version)),
+		sctx.WithComponent(metrics.NewMetricClient(common.KeyCompMetric, serviceName, version)),
 		sctx.WithComponent(redisc.NewRedisc(common.KeyCompRedis)),
 	)
 }
@@ -63,6 +66,12 @@ var rootCmd = &cobra.Command{
 			_, span := tracing.StartTrace(c.Request.Context(), "ping")
 			defer span.End()
 
+			provider := serviceCtx.MustGet(common.KeyCompMetric).(metrics.MetricComp).GetProvider()
+			counter, _ := provider.Meter(
+				"instrumentation/package/name",
+				metric.WithInstrumentationVersion("0.0.1"),
+			).Int64Counter("add_counter", metric.WithDescription("how many times add function has been called."))
+			counter.Add(c.Request.Context(), 1)
 			c.JSON(http.StatusOK, core.ResponseData("ok"))
 		})
 
