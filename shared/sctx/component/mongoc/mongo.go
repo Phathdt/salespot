@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 
+	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"salespot/shared/sctx"
@@ -40,7 +41,14 @@ func (m *mongoDB) Activate(sc sctx.ServiceContext) error {
 	m.logger = sctx.GlobalLogger().GetLogger(m.id)
 
 	ctx := context.Background()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(m.mongoURI))
+
+	cmdMonitor := &event.CommandMonitor{
+		Started: func(_ context.Context, e *event.CommandStartedEvent) {
+			m.logger.Info(e.Command)
+		},
+	}
+
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(m.mongoURI).SetMonitor(cmdMonitor))
 	if err != nil {
 		fmt.Println(err)
 		return err
