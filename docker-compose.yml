@@ -32,9 +32,6 @@ services:
     command: ["--config=/etc/collector-config.yaml"]
     volumes:
       - ./config/collector-config.yaml:/etc/collector-config.yaml
-    ports:
-      - "15555:5555"
-      - "14444:4444"
 
   tempo:
     image: grafana/tempo:1.5.0
@@ -85,7 +82,7 @@ services:
       MONGO_DATABASE: ${MONGO_DATABASE}
       CONSUL_HOST: consul:8500
       REDIS_URI: redis://redis-db:6379
-      COLLECTOR_HOST: collector:5555
+      COLLECTOR_HOST: collector:4317
     ports:
       - 13000:3000
 
