@@ -61,7 +61,8 @@ var rootCmd = &cobra.Command{
 		apiRouter := router.Group("/api")
 		productRouter := apiRouter.Group("/products")
 		{
-			productRouter.GET("/", ginproduct.ListProduct(serviceCtx))
+			productRouter.GET("", ginproduct.ListProduct(serviceCtx))
+			productRouter.GET("/:id", ginproduct.GetProduct(serviceCtx))
 		}
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {

@@ -8,6 +8,7 @@ import (
 
 type MongoStorage interface {
 	ListProduct(ctx context.Context) ([]models.Product, error)
+	GetProduct(ctx context.Context, id string) (*models.Product, error)
 }
 
 type repository struct {
@@ -20,4 +21,8 @@ func NewRepository(store MongoStorage) *repository {
 
 func (r *repository) ListProduct(ctx context.Context) ([]models.Product, error) {
 	return r.store.ListProduct(ctx)
+}
+
+func (r *repository) GetProduct(ctx context.Context, id string) (*models.Product, error) {
+	return r.store.GetProduct(ctx, id)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"salespot/services/product_service/internal/models"
 )
@@ -37,4 +38,20 @@ func (m *mongoStore) ListProduct(ctx context.Context) ([]models.Product, error) 
 	}
 
 	return products, nil
+}
+
+func (m *mongoStore) GetProduct(ctx context.Context, id string) (*models.Product, error) {
+	collection := m.db.Collection(models.Product{}.Collection())
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	var product models.Product
+	if err = collection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&product); err != nil {
+		return nil, err
+	}
+
+	return &product, nil
 }
