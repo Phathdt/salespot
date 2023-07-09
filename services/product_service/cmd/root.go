@@ -12,7 +12,7 @@ import (
 	"salespot/shared/sctx/component/discovery/consul"
 	"salespot/shared/sctx/component/ginc"
 	smdlw "salespot/shared/sctx/component/ginc/middleware"
-	"salespot/shared/sctx/component/gormc"
+	"salespot/shared/sctx/component/mongoc"
 	"salespot/shared/sctx/core"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,7 @@ func newServiceCtx() sctx.ServiceContext {
 	return sctx.NewServiceContext(
 		sctx.WithName(serviceName),
 		sctx.WithComponent(ginc.NewGin(common.KeyCompGIN)),
-		sctx.WithComponent(gormc.NewGormDB(common.KeyCompGorm, "")),
+		sctx.WithComponent(mongoc.NewMongoDB(common.KeyCompMongo, "")),
 		sctx.WithComponent(consul.NewConsulComponent(common.KeyCompConsul, serviceName, version, 3000)),
 	)
 }

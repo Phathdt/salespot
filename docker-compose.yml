@@ -34,7 +34,8 @@ services:
       logging: "promtail"
       logging_jobname: "containerlogs"
     environment:
-      DB_DSN: ${DB_DSN}
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DATABASE: ${MONGO_DATABASE}
       CONSUL_HOST: consul:8500
       REDIS_URI: redis://redis-db:6379
     ports:
