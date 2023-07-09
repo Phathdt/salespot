@@ -27,6 +27,53 @@ services:
     ports:
       - 8500:8500
 
+  collector:
+    image: otel/opentelemetry-collector:0.79.0
+    command: ["--config=/etc/collector-config.yaml"]
+    volumes:
+      - ./config/collector-config.yaml:/etc/collector-config.yaml
+    ports:
+      - "15555:5555"
+      - "14444:4444"
+
+  tempo:
+    image: grafana/tempo:1.5.0
+    command: [ "-search.enabled=true", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo-config.yaml:/etc/tempo.yaml
+      - ./config/tempo-overrides.yaml:/etc/overrides.yaml
+    ports:
+      - "13200:3200"
+      - "14317:4317"
+
+  grafana:
+    image: grafana/grafana:9.2.2
+    container_name: grafana
+    hostname: grafana
+    volumes:
+      - ./config/grafana-bootstrap.ini:/etc/grafana/grafana.ini
+      - ./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3000:3000"
+
+  loki:
+    image: grafana/loki:2.8.2
+    ports:
+      - 13100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image:  grafana/promtail:main
+    volumes:
+      - ./config/promtail.yaml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
+
   product_service:
     build:
       dockerfile: ./services/product_service/Dockerfile.dev
