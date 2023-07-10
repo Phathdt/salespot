@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"github.com/qiniu/qmgo"
 	"salespot/services/product_service/internal/models"
 	"salespot/shared/sctx/component/tracing"
@@ -27,7 +28,7 @@ func (m *mongoStore) ListProduct(ctx context.Context) ([]models.Product, error) 
 
 	var products []models.Product
 	if err := collection.Find(ctx, bson.M{}).All(&products); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return products, nil
@@ -41,12 +42,12 @@ func (m *mongoStore) GetProduct(ctx context.Context, id string) (*models.Product
 
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	var product models.Product
 	if err = collection.Find(ctx, bson.M{"_id": objectId}).One(&product); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return &product, nil

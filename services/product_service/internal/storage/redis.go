@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"salespot/services/product_service/internal/models"
@@ -25,12 +26,12 @@ func (r *redisStore) GetProduct(ctx context.Context, id string) (*models.Product
 
 	result, err := r.client.Get(ctx, fmt.Sprintf("/products/%s", id)).Result()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	var product models.Product
 	if err = bson.Unmarshal([]byte(result), &product); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return &product, nil
@@ -42,11 +43,11 @@ func (r *redisStore) StoreProduct(ctx context.Context, product *models.Product) 
 
 	bytes, err := bson.Marshal(product)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	if err = r.client.Set(ctx, fmt.Sprintf("/products/%s", product.ID.Hex()), bytes, time.Hour).Err(); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	return nil
