@@ -6,12 +6,10 @@ import (
 	"os"
 	"time"
 
-	"go.opentelemetry.io/otel/metric"
 	"salespot/shared/common"
 	"salespot/shared/sctx"
 	"salespot/shared/sctx/component/ginc"
 	smdlw "salespot/shared/sctx/component/ginc/middleware"
-	"salespot/shared/sctx/component/metrics"
 	"salespot/shared/sctx/component/tracing"
 	"salespot/shared/sctx/core"
 
@@ -58,12 +56,6 @@ var rootCmd = &cobra.Command{
 			_, span := tracing.StartTrace(c.Request.Context(), "ping")
 			defer span.End()
 
-			provider := serviceCtx.MustGet(common.KeyCompMetric).(metrics.MetricComp).GetProvider()
-			counter, _ := provider.Meter(
-				"instrumentation/package/name",
-				metric.WithInstrumentationVersion("0.0.1"),
-			).Int64Counter("add_counter", metric.WithDescription("how many times add function has been called."))
-			counter.Add(c.Request.Context(), 1)
 			c.JSON(http.StatusOK, core.ResponseData("ok"))
 		})
 
