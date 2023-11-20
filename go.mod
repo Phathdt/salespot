@@ -1,6 +1,6 @@
 module salespot
 
-go 1.20
+go 1.21
 
 require (
 	github.com/facebookgo/flagenv v0.0.0-20160425205200-fcd59fca7456

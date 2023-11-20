@@ -7,15 +7,11 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/metric"
-	"salespot/services/product_service/internal/transport/ginproduct"
 	"salespot/shared/common"
 	"salespot/shared/sctx"
-	"salespot/shared/sctx/component/discovery/consul"
 	"salespot/shared/sctx/component/ginc"
 	smdlw "salespot/shared/sctx/component/ginc/middleware"
 	"salespot/shared/sctx/component/metrics"
-	"salespot/shared/sctx/component/mongoc"
-	"salespot/shared/sctx/component/redisc"
 	"salespot/shared/sctx/component/tracing"
 	"salespot/shared/sctx/core"
 
@@ -34,11 +30,7 @@ func newServiceCtx() sctx.ServiceContext {
 	return sctx.NewServiceContext(
 		sctx.WithName(serviceName),
 		sctx.WithComponent(ginc.NewGin(common.KeyCompGIN)),
-		sctx.WithComponent(mongoc.NewMongoDB(common.KeyCompMongo, "")),
-		sctx.WithComponent(consul.NewConsulComponent(common.KeyCompConsul, serviceName, version, 3000)),
 		sctx.WithComponent(tracing.NewTracingClient(common.KeyCompTracing, serviceName, version)),
-		sctx.WithComponent(metrics.NewMetricClient(common.KeyCompMetric, serviceName, version)),
-		sctx.WithComponent(redisc.NewRedisc(common.KeyCompRedis)),
 	)
 }
 
@@ -74,13 +66,6 @@ var rootCmd = &cobra.Command{
 			counter.Add(c.Request.Context(), 1)
 			c.JSON(http.StatusOK, core.ResponseData("ok"))
 		})
-
-		apiRouter := router.Group("/api")
-		productRouter := apiRouter.Group("/products")
-		{
-			productRouter.GET("", ginproduct.ListProduct(serviceCtx))
-			productRouter.GET("/:id", ginproduct.GetProduct(serviceCtx))
-		}
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
 			logger.Fatal(err)
